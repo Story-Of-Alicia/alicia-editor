@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>WebSocket Alpine.js App</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<style>
+  body {
+      background: #111;
+      color: #ccc;
+  }
+</style>
+<body>
+<div x-data="app()">
+  <div x-show="!host.connected" >
+    <button @click="connect()">Connect to the editor server.</button>
+  </div>
+  <div x-show="host.connected" >
+    <button @click="request_read_pak()">Read the PAK.</button>
+  </div>
+  <div x-show="host.connected" >
+    <button @click="request_read_pak()">Write the PAK.</button>
+  </div>
+  <div x-show="content.assets.length != 0">
+    <template x-for="asset in content.assets" :key="asset.path">
+      <ul>
+        <code><li x-text="asset.path"></li></code>
+      </ul>
+    </template>
+  </div>
+</div>
+
+<script>
+function app() {
+  return {
+    host: {
+        socket: null,
+        connected: false,
+        address: "127.0.0.1",
+        port: 8083,
+    },
+    file: {
+        path: null
+    },
+    intro: {
+        header: null,
+    },
+    content: {
+        header: null,
+        assets: [],
+    },
+    data: {
+        header: null,
+        assets: []
+    },
+    connect() {
+        this.host.socket = new WebSocket(
+            "ws://localhost:8083");
+
+        this.host.socket.onopen = () => {
+            this.host.connected = true;
+        };
+
+        this.host.socket.onmessage = (event) => {
+            const payload = JSON.parse(event.data);
+            if (payload.action === "asset_listing")
+            {
+                console.log("updated asset listing")
+                this.file.path = payload.path;
+                payload.data.forEach((asset) => {
+                    this.content.assets.push(asset)
+                })
+                console.log(this.content.assets)
+            }
+        };
+
+        this.host.socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            alert("Oh, an error connecting to the editor :( Check console.")
+        };
+
+        this.host.socket.onclose = () => {
+            this.host.connected = false;``
+        };
+    },
+    request_read_pak() {
+        this.host.socket.send(
+            JSON.stringify({action: "select_resource"}))
+    }
+  };
+}
+</script>
+</body>
+</html>
