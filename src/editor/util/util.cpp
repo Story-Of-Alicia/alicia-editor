@@ -2,9 +2,9 @@
 
 #include <vector>
 
+#include <windows.h>
 #include <commdlg.h>
 #include <ShlObj_core.h>
-#include <windows.h>
 
 namespace util
 {
