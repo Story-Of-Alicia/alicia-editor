@@ -22,7 +22,7 @@
     <button @click="request_read_pak()">Read the PAK.</button>
   </div>
   <div x-show="host.connected" >
-    <button @click="request_read_pak()">Write the PAK.</button>
+    <button @click="request_write_pak()">Write the PAK.</button>
   </div>
   <div x-show="content.assets.length != 0">
     <template x-for="asset in content.assets" :key="asset.path">
@@ -88,8 +88,12 @@ function app() {
     },
     request_read_pak() {
         this.host.socket.send(
-            JSON.stringify({action: "select_resource"}))
-    }
+            JSON.stringify({action: "read"}))
+    },
+    request_write_pak() {
+          this.host.socket.send(
+              JSON.stringify({action: "write"}))
+      }
   };
 }
 </script>

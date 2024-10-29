@@ -32,11 +32,8 @@ namespace libpak
      * @throws std::runtime_exception when stream source is not available
      * @returns True if reading was successful, otherwise returns false.
      */
-    bool read(
-     uint8_t* buffer,
-     int64_t size,
-     int64_t offset = 0,
-     std::ios::seekdir dir = std::ios::beg);
+    bool
+    read(uint8_t* buffer, int64_t size, int64_t offset = 0, std::ios::seekdir dir = std::ios::beg);
 
     /**
      * Reads blob from stream source
@@ -62,10 +59,10 @@ namespace libpak
      * @returns True if writing was successful, otherwise returns false.
      */
     bool write(
-        const uint8_t* buffer,
-        int64_t size,
-        int64_t offset = 0,
-        std::ios::seekdir dir = std::ios::beg);
+      const uint8_t* buffer,
+      int64_t size,
+      int64_t offset = 0,
+      std::ios::seekdir dir = std::ios::beg);
 
     /**
      * Writes blob to stream sink.
@@ -76,9 +73,9 @@ namespace libpak
      * @return True if writing was successful, otherwise returns false.
      */
     template <typename Blob>
-    bool write(Blob& blob, int64_t offset = 0, std::ios::seekdir dir = std::ios::beg)
+    bool write(const Blob& blob, int64_t offset = 0, std::ios::seekdir dir = std::ios::beg)
     {
-      return write(reinterpret_cast<uint8_t*>(&blob), sizeof blob, offset, dir);
+      return write(reinterpret_cast<const uint8_t*>(&blob), sizeof blob, offset, dir);
     }
 
     /**

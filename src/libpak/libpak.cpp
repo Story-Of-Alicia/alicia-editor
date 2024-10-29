@@ -34,7 +34,7 @@ bool libpak::stream::read(uint8_t* buffer, int64_t size, int64_t offset, std::io
 }
 
 bool libpak::stream::write(
-    const uint8_t* buffer, int64_t size, int64_t offset, std::ios::seekdir dir)
+  const uint8_t* buffer, int64_t size, int64_t offset, std::ios::seekdir dir)
 {
   if (this->sink == nullptr)
     throw std::runtime_error("stream sink is not available");
@@ -86,7 +86,7 @@ int64_t libpak::stream::get_reader_cursor()
 }
 
 libpak::stream::stream(
-    const std::shared_ptr<std::istream>& source, const std::shared_ptr<std::ostream>& sink)
+  const std::shared_ptr<std::istream>& source, const std::shared_ptr<std::ostream>& sink)
     : source(source), sink(sink)
 {
 }
@@ -96,9 +96,11 @@ void libpak::resource::create() {}
 void libpak::resource::read(bool data)
 {
   // input stream
-  this->input_stream = std::make_shared<std::ifstream>(this->resource_path, std::ios::binary);
+  this->input_stream = std::make_shared<std::ifstream>(
+    this->resource_path, std::ios::binary);
   // resource stream wrapper
-  this->resource_stream = std::make_shared<stream>(this->input_stream, this->output_stream);
+  this->resource_stream = std::make_shared<stream>(
+    this->input_stream, this->output_stream);
 
   // reset to known state
   {
@@ -117,10 +119,8 @@ void libpak::resource::read(bool data)
   // reserve the size of asset count
   this->assets.reserve(this->content_header.assets_count);
 
-  const uint32_t registeredAssetCount = content_header.assets_count;
-
   // read the assets
-  for (uint32_t assetIndex{0}; assetIndex < registeredAssetCount; assetIndex++)
+  for (uint32_t assetIndex{0}; assetIndex < content_header.assets_count; assetIndex++)
   {
     try
     {
@@ -158,18 +158,28 @@ void libpak::resource::write()
   int64_t data_offset = 0;
   for (auto& [path, asset] : this->assets)
   {
+    // Export the asset
+    asset.header.is_asset_embedded = false;
+    asset.header.embedded_data_length = 0;
+    asset.header.embedded_data_offset = 0;
+    asset.header.crc_embedded = 0x0;
+    asset.header.checksum_embedded = 0x0;
+
+    // asset.header.checksum_decompressed = 0x0;
+    // asset.header.crc_decompressed = 0x0;
+
     this->write_asset(asset);
+    //asset.header.embedded_data_offset = PAK_DATA_SECTOR + data_offset;
 
-    asset.header.embedded_data_offset = PAK_DATA_SECTOR + data_offset;
+    // auto origin = this->resource_stream->set_writer_cursor(asset.header.asset_offset);
+    // this->write_asset_data(asset);
 
-    auto origin = this->resource_stream->set_writer_cursor(asset.header.asset_offset);
-    this->write_asset_data(asset);
     // Offset the data cursor by the length of the embedded data.
-    data_offset += asset.header.embedded_data_length;
+    //data_offset += asset.header.embedded_data_length;
 
     // Return to the asset header origin
-    this->resource_stream->set_writer_cursor(origin);
-  }
+    // this->resource_stream->set_writer_cursor(origin);
+   }
 
   if (!this->resource_stream->write(this->data_header))
     throw std::runtime_error("failed to write data header");
@@ -191,7 +201,6 @@ void libpak::resource::write()
 
 void libpak::resource::read_asset(libpak::asset& asset, bool data)
 {
-
   auto& header = asset.header;
   // read asset header
   if (!this->resource_stream->read(header, header.asset_offset))
@@ -275,7 +284,13 @@ void libpak::resource::read_asset_data(libpak::asset& asset)
   }
 }
 
-void libpak::resource::write_asset(const libpak::asset& asset) {}
+void libpak::resource::write_asset(const libpak::asset& asset)
+{
+  const auto& header = asset.header;
+  // write the asset header
+  if (!this->resource_stream->write(header))
+    throw std::runtime_error("failed to write asset header");
+}
 
 void libpak::resource::write_asset_data(const libpak::asset& asset) {}
 

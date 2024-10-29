@@ -33,9 +33,9 @@ namespace util
   //! @param flags
   //! @returns Path to the file.
   std::string win32_prompt_for_file(
-      std::string_view prompt_title,
-      const std::span<const std::string_view>& type_filter,
-      uint32_t flags = 0);
+    std::string_view prompt_title,
+    const std::span<const std::string_view>& type_filter,
+    uint32_t flags = 0);
 
   //! Prompts user for a folder selection.
   //!

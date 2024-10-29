@@ -16,7 +16,7 @@ namespace
 {
 
   constexpr std::array<std::string_view, 2> ALICIA_PAK_PROMPT_TYPES = {
-      "PAK file (*.pak)", "*.pak;*.pak.*;*.pak.bak"};
+    "PAK file (*.pak)", "*.pak;*.pak.*;*.pak.bak"};
 
 } // namespace
 
@@ -31,6 +31,8 @@ int main()
 
   // Listen for incoming connections.
   acceptor.listen(asio::socket_base::max_listen_connections);
+
+  std::unique_ptr<libpak::resource> resource;
 
   // Heartbeat loop.
   while (true)
@@ -49,33 +51,38 @@ int main()
     {
       try
       {
+        // Read websocket.
         webSocket.read(buffer);
         if (!webSocket.got_text())
         {
           continue;
         }
 
+
         const std::string request_string(
-            static_cast<const char*>(buffer.cdata().data()), buffer.size());
+          static_cast<const char*>(buffer.cdata().data()), buffer.size());
+        buffer.consume(buffer.size());
+
         const auto request = nlohmann::json::parse(request_string);
 
-        if (request["action"] == "select_resource")
+        spdlog::info("Received request: {}", request_string);
+
+        if (request["action"] == "read")
         {
-          libpak::resource resource(
-              util::win32_prompt_for_file("Select the PAK file.", ALICIA_PAK_PROMPT_TYPES));
-          resource.read();
+          resource = std::make_unique<libpak::resource>(
+            util::win32_prompt_for_file("Select the PAK file.", ALICIA_PAK_PROMPT_TYPES));
+          resource->read();
 
           nlohmann::json response;
           response["action"] = "asset_listing";
-          response["path"] = resource.resource_path.c_str();
+          response["path"] = resource->resource_path.c_str();
           response["data"] = nlohmann::json::array();
 
-          for (const auto& [path, asset] : resource.assets)
+          for (const auto& [path, asset] : resource->assets)
           {
             const auto narrow_path = util::win32_narrow(path);
             nlohmann::json asset_data;
             asset_data["path"] = narrow_path;
-
             response["data"].emplace_back(asset_data);
           }
 
@@ -83,6 +90,10 @@ int main()
 
           webSocket.text(true);
           webSocket.write(asio::buffer(response_string));
+        }
+        if (request["action"] == "write")
+        {
+          resource->write();
         }
       }
       catch (const std::exception& x)
