@@ -4,13 +4,6 @@ project(alicia_editor)
 add_subdirectory(3rd-party)
 find_package(Boost REQUIRED)
 
-add_library(libpak
-    src/libpak/libpak.cpp)
-target_compile_features(libpak
-        PRIVATE cxx_std_20)
-target_include_directories(libpak PUBLIC include/)
-target_link_libraries(libpak PUBLIC zlibstatic)
-
 add_executable(alicia_editor
     src/editor/main.cpp
     src/editor/util/util.cpp)

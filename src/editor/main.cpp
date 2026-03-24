@@ -15,8 +15,9 @@ namespace beast = boost::beast;
 namespace
 {
 
-  constexpr std::array<std::string_view, 2> ALICIA_PAK_PROMPT_TYPES = {
-    "PAK file (*.pak)", "*.pak;*.pak.*;*.pak.bak"};
+constexpr std::array<std::string_view, 2> ALICIA_PAK_PROMPT_TYPES = {
+  "PAK file (*.pak)",
+  "*.pak;*.pak.*;*.pak.bak"};
 
 } // namespace
 
@@ -58,7 +59,6 @@ int main()
           continue;
         }
 
-
         const std::string request_string(
           static_cast<const char*>(buffer.cdata().data()), buffer.size());
         buffer.consume(buffer.size());
@@ -85,7 +85,7 @@ int main()
             asset_data["path"] = narrow_path;
             asset_data["size"] = asset.header.data_decompressed_length;
             asset_data["compressed_size"] = asset.header.embedded_data_length;
-            asset_data["is_embedded"] = static_cast<bool>(asset.header.is_asset_embedded);
+            asset_data["is_embedded"] = static_cast<bool>(asset.header.are_asset_data_embedded);
             asset_data["is_compressed"] = static_cast<bool>(asset.header.is_data_compressed);
             response["data"].emplace_back(asset_data);
           }
@@ -127,7 +127,7 @@ int main()
 
           auto& asset = it->second;
 
-          if (!asset.header.is_asset_embedded)
+          if (!asset.header.are_asset_data_embedded)
           {
             nlohmann::json err;
             err["action"] = "error";
@@ -138,12 +138,12 @@ int main()
           }
 
           // Read asset data on demand if not already loaded.
-          if (!asset.data.buffer)
+          if (asset.data.buffer.empty())
           {
             resource->read_asset_data(asset);
           }
 
-          if (!asset.data.buffer)
+          if (asset.data.buffer.empty())
           {
             nlohmann::json err;
             err["action"] = "error";
@@ -155,8 +155,8 @@ int main()
 
           // Determine the actual data size.
           uint32_t data_size = asset.header.is_data_compressed
-            ? asset.header.data_decompressed_length
-            : asset.header.embedded_data_length;
+                                 ? asset.header.data_decompressed_length
+                                 : asset.header.embedded_data_length;
 
           // Send JSON header so the client knows what's coming.
           nlohmann::json header;
@@ -168,7 +168,7 @@ int main()
 
           // Send the raw binary data.
           webSocket.binary(true);
-          webSocket.write(asio::buffer(asset.data.buffer.get(), data_size));
+          webSocket.write(asio::buffer(asset.data.buffer.data(), asset.data.buffer.size()));
         }
         if (request["action"] == "write")
         {
