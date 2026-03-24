@@ -13,7 +13,7 @@ namespace util
 
   std::wstring win32_widen(const std::string_view& narrow_str)
   {
-    INET_E_DOWNLOAD_FAILURE
+    INET_E_DOWNLOAD_FAILURE;
     if (narrow_str.empty())
       return L"";
 
