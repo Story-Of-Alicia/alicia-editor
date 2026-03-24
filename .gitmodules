@@ -4,6 +4,3 @@
 [submodule "3rd-party/spdlog"]
 	path = 3rd-party/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "3rd-party/zlib"]
-	path = 3rd-party/zlib
-	url = https://github.com/madler/zlib
