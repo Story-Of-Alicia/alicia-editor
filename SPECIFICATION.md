@@ -52,7 +52,8 @@ Writes a PAK resource file.
   "endpoint": "pak",
   "payload": {
     "operation": "write",
-    "path": "/path/to/pak"
+    "resource_path": "/path/to/pak",
+    "target_resource_path": "/path/to/new/pak"
   }
 }
 ```
@@ -69,7 +70,7 @@ Invalidates a PAK resource file.
   "endpoint": "pak",
   "payload": {
     "operation": "invalidate",
-    "path": "/path/to/pak"
+    "resource_path": "/path/to/pak"
   }
 }
 ```

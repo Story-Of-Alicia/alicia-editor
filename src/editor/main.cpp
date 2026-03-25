@@ -108,6 +108,7 @@ int main()
     else if (operation == "write")
     {
       const std::filesystem::path resourcePath = payload.value("resource_path", "");
+      const std::filesystem::path targetResourcePath = payload.value("target_resource_path", resourcePath);
       if (resourcePath.empty())
       {
         return nlohmann::json{
@@ -123,6 +124,7 @@ int main()
 
       auto& resource = resourceIterator->second;
 
+      resource.resource_path = targetResourcePath.string();
       resource.write();
 
       spdlog::debug("Wrote PAK resource '{}'", resourcePath.string());
