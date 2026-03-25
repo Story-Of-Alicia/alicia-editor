@@ -90,10 +90,10 @@ std::string win32_narrow(const std::u16string_view& wide_str)
   return narrow_str;
 }
 
-std::string win32_prompt_for_file(
-  std::string_view prompt_title,
+std::filesystem::path win32_prompt_for_file(
+  const std::string_view prompt_title,
   const std::span<const std::string_view>& type_filter,
-  uint32_t flags)
+  const uint32_t flags)
 {
 
   std::wstring path;
@@ -124,7 +124,7 @@ std::string win32_prompt_for_file(
   return win32_narrow(path);
 }
 
-std::string win32_prompt_for_folder(std::string_view prompt_title, int32_t flags)
+std::filesystem::path win32_prompt_for_folder(std::string_view prompt_title, int32_t flags)
 {
   std::wstring path;
   path.resize(MAX_PATH);

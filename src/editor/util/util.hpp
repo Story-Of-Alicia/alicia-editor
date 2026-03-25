@@ -2,6 +2,7 @@
 #ifndef ALICIA_EDITOR_UTIL_HPP
 #define ALICIA_EDITOR_UTIL_HPP
 
+#include <filesystem>
 #include <span>
 #include <string>
 
@@ -32,7 +33,7 @@ std::string win32_narrow(const std::u16string_view& wide_str);
 //! @param type_filter
 //! @param flags
 //! @returns Path to the file.
-std::string win32_prompt_for_file(
+std::filesystem::path win32_prompt_for_file(
   std::string_view prompt_title,
   const std::span<const std::string_view>& type_filter,
   uint32_t flags = 0);
@@ -41,7 +42,7 @@ std::string win32_prompt_for_file(
 //!
 //! @param prompt_title Title of the prompt dialog.
 //! @param flags
-std::string win32_prompt_for_folder(std::string_view prompt_title, int32_t flags = 0);
+std::filesystem::path win32_prompt_for_folder(std::string_view prompt_title, int32_t flags = 0);
 
 } // namespace util
 
