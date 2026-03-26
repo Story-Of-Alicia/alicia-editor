@@ -72,8 +72,8 @@ int main()
         "Select the PAK file.",
         ALICIA_PAK_PROMPT_TYPES);
 
-      responseJson["resource_path"] = pakPath.string();
-      spdlog::debug("PAK resource file path: {}", pakPath.string());
+      responseJson["resource_path"] = pakPath.string().c_str();
+      spdlog::debug("PAK resource file path: {}", pakPath.string().c_str());
     }
     else if (operation == "read")
     {
@@ -191,7 +191,7 @@ int main()
       std::memcpy(
         asset.header.path,
         unicodeAssetPath.data(),
-        unicodeAssetPath.length());
+        unicodeAssetPath.length() * sizeof(char16_t));
     }
 
     nlohmann::json responseJson{};
@@ -212,6 +212,7 @@ int main()
     else if (operation == "write")
     {
       asset.data.buffer = payload.value("data", std::vector<std::byte>{});
+      asset.header.are_data_embedded = true;
 
       spdlog::debug(
         "Wrote {} bytes of data to asset '{}' to a resource file '{}'",
